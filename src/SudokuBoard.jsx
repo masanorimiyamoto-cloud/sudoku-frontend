@@ -30,7 +30,7 @@ function SudokuBoard() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://127.0.0.1:5000/solve", {
+      const response = await axios.post("https://numplay.onrender.com/solve", {
         board: board
       });
 
@@ -48,7 +48,7 @@ function SudokuBoard() {
   // 新しい問題を取得
   const fetchNewPuzzle = async () => {
     try {
-      const response = await axios.get("http://127.0.0.1:5000/generate");
+      const response = await axios.get("https://numplay.onrender.com/generate");
       console.log("🟢 新しい問題をリクエスト中...");
       setBoard(response.data.board);
       setIsUserInput(Array(9).fill(null).map(() => Array(9).fill(false)));
