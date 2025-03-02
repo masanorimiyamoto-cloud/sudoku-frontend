@@ -50,56 +50,44 @@ function SudokuBoard() {
   // 新しい問題を取得
   const fetchNewPuzzle = async () => {
     try {
-      console.log("🟢 新しい問題をリクエスト中...");
-      const response = await axios.get("https://numplay.onrender.com/generate", {
-        headers: { "Content-Type": "application/json" },
-        mode: "cors"
-      });
-
-      console.log("🟢 APIレスポンス: ", response.data);
-
-      // まず board の中身を確かめる
-      if (typeof response.data.board === "string") {
-        // 1) カンマで split() すると、配列要素が 81 個になるはず
-        const arr81 = response.data.board.split(",");
-
-        // 2) 各要素を数値化 ("" は 0 とみなす)
-        const arr81numbers = arr81.map(str => {
-          if (str === "") return 0; // 空文字→0
-          const num = parseInt(str, 10);
-          return Number.isNaN(num) ? 0 : num; // 変換失敗→0
+        console.log("🟢 新しい問題をリクエスト中...");
+        const response = await axios.get("https://numplay.onrender.com/generate", {
+            headers: { "Content-Type": "application/json" },
+            mode: "cors"
         });
 
-        // 3) 9x9 に切り出す
-        const newBoard = [];
-        for (let i = 0; i < 9; i++) {
-          newBoard.push(arr81numbers.slice(i * 9, i * 9 + 9));
+        console.log("🟢 APIレスポンス: ", response.data);
+
+        let rawBoard = response.data.board;
+
+        // 🚨 データが "カンマ区切りの文字列" だった場合、正しい配列に変換
+        if (typeof rawBoard === "string") {
+            console.warn("⚠️ boardが文字列として返ってきています！変換を試みます...");
+            rawBoard = rawBoard.split(",").map(str => {
+                const num = parseInt(str, 10);
+                return isNaN(num) ? 0 : num; // 数値に変換できない場合は 0 にする
+            });
         }
 
-        setBoard(newBoard);
-        setIsUserInput(Array(9).fill(null).map(() => Array(9).fill(false)));
-      } else if (Array.isArray(response.data.board) && response.data.board.length === 81) {
-        // 万が一、すでに Array(81) で来る場合の処理
-        const arr81numbers = response.data.board.map(item =>
-          typeof item === "string" ? parseInt(item, 10) : item
-        );
-
-        const newBoard = [];
-        for (let i = 0; i < 9; i++) {
-          newBoard.push(arr81numbers.slice(i * 9, i * 9 + 9));
+        // 🚨 データが 1 次元配列(81個) だった場合 → 9x9 に変換
+        if (Array.isArray(rawBoard) && rawBoard.length === 81) {
+            console.log("🔹 boardが 1次元配列(81個) なので 9x9 に変換");
+            const newBoard = [];
+            for (let i = 0; i < 9; i++) {
+                newBoard.push(rawBoard.slice(i * 9, i * 9 + 9));
+            }
+            setBoard(newBoard);
+            setIsUserInput(Array(9).fill(null).map(() => Array(9).fill(false)));
+        } else {
+            console.error("❌ APIからのデータ形式が想定外です:", rawBoard);
+            alert("問題の取得に失敗しました。データ形式が不正です。");
         }
-        setBoard(newBoard);
-        setIsUserInput(Array(9).fill(null).map(() => Array(9).fill(false)));
-      } else {
-        console.error("❌ APIから不正なデータが返されました:", response.data.board);
-        alert("問題の取得に失敗しました。");
-      }
-
     } catch (error) {
-      console.error("❌ 問題取得エラー: ", error);
-      alert("問題の取得に失敗しました。");
+        console.error("❌ 問題取得エラー: ", error);
+        alert("問題の取得に失敗しました。");
     }
-  };
+};
+
 
   // JSXをreturn
   return (
