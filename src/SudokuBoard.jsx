@@ -50,28 +50,34 @@ function SudokuBoard() {
   // 新しい問題を取得
   const fetchNewPuzzle = async () => {
     try {
-      console.log("🟢 新しい問題をリクエスト中...");
-      const response = await axios.get("https://numplay.onrender.com/generate", {
-        headers: {
-          "Content-Type": "application/json"
-        },
-        mode: "cors" // CORSを明示的に設定
-      });
+        console.log("🟢 新しい問題をリクエスト中...");
+        const response = await axios.get("https://numplay.onrender.com/generate", {
+            headers: {
+                "Content-Type": "application/json"
+            },
+            mode: "cors"
+        });
 
-      console.log("🟢 APIレスポンス: ", response.data);
+        console.log("🟢 APIレスポンス: ", response.data);
 
-      if (response.data.status === "ok" && response.data.board) {
-        setBoard(response.data.board);
-        setIsUserInput(Array(9).fill(null).map(() => Array(9).fill(false)));
-      } else {
-        console.error("❌ APIから不正なデータが返されました:", response.data);
-        alert("問題の取得に失敗しました。");
-      }
+        if (response.data.status === "ok" && response.data.board) {
+            // 1次元配列を 9x9 に変換
+            const newBoard = [];
+            for (let i = 0; i < 9; i++) {
+                newBoard.push(response.data.board.slice(i * 9, i * 9 + 9));
+            }
+
+            setBoard(newBoard);
+            setIsUserInput(Array(9).fill(null).map(() => Array(9).fill(false)));
+        } else {
+            console.error("❌ APIから不正なデータが返されました:", response.data);
+            alert("問題の取得に失敗しました。");
+        }
     } catch (error) {
-      console.error("❌ 問題取得エラー: ", error);
-      alert("問題の取得に失敗しました。");
+        console.error("❌ 問題取得エラー: ", error);
+        alert("問題の取得に失敗しました。");
     }
-  };
+};
 
   return (
     <div style={{ textAlign: "center" }}>
