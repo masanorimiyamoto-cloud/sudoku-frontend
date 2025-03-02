@@ -55,33 +55,53 @@ function SudokuBoard() {
         headers: { "Content-Type": "application/json" },
         mode: "cors"
       });
-  
+
       console.log("🟢 APIレスポンス: ", response.data);
-  
+
       // まず board の中身を確かめる
-      let rawBoard = response.data.board;
-      if (typeof rawBoard === "string") {
-        // カンマ区切りの文字列を81要素の配列に変換
-        rawBoard = rawBoard.split(",").map(ch => (ch === "" ? 0 : parseInt(ch, 10) || 0));
-      }
-  
-      // rawBoard が Array(81) だった場合、9x9 にスライス
-      if (Array.isArray(rawBoard) && rawBoard.length === 81) {
+      if (typeof response.data.board === "string") {
+        // 1) カンマで split() すると、配列要素が 81 個になるはず
+        const arr81 = response.data.board.split(",");
+
+        // 2) 各要素を数値化 ("" は 0 とみなす)
+        const arr81numbers = arr81.map(str => {
+          if (str === "") return 0; // 空文字→0
+          const num = parseInt(str, 10);
+          return Number.isNaN(num) ? 0 : num; // 変換失敗→0
+        });
+
+        // 3) 9x9 に切り出す
         const newBoard = [];
         for (let i = 0; i < 9; i++) {
-          newBoard.push(rawBoard.slice(i * 9, i * 9 + 9));
+          newBoard.push(arr81numbers.slice(i * 9, i * 9 + 9));
+        }
+
+        setBoard(newBoard);
+        setIsUserInput(Array(9).fill(null).map(() => Array(9).fill(false)));
+      } else if (Array.isArray(response.data.board) && response.data.board.length === 81) {
+        // 万が一、すでに Array(81) で来る場合の処理
+        const arr81numbers = response.data.board.map(item =>
+          typeof item === "string" ? parseInt(item, 10) : item
+        );
+
+        const newBoard = [];
+        for (let i = 0; i < 9; i++) {
+          newBoard.push(arr81numbers.slice(i * 9, i * 9 + 9));
         }
         setBoard(newBoard);
+        setIsUserInput(Array(9).fill(null).map(() => Array(9).fill(false)));
       } else {
-        console.error("❌ APIから不正なデータが返されました:", rawBoard);
+        console.error("❌ APIから不正なデータが返されました:", response.data.board);
         alert("問題の取得に失敗しました。");
       }
+
     } catch (error) {
       console.error("❌ 問題取得エラー: ", error);
       alert("問題の取得に失敗しました。");
     }
   };
-  
+
+  // JSXをreturn
   return (
     <div style={{ textAlign: "center" }}>
       <h1>Sudoku Solver</h1>
