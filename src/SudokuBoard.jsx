@@ -5,8 +5,10 @@ function SudokuBoard() {
   const initialBoard = Array(9).fill(null).map(() => Array(9).fill(0));
 
   const [board, setBoard] = useState(initialBoard);
+  const [originalBoard, setOriginalBoard] = useState(initialBoard); // 問題の元データ
   const [selectedCell, setSelectedCell] = useState(null); // タップされたセル
 
+  // セルが変更されたとき
   const handleChangeCell = (row, col, value) => {
     const val = parseInt(value) || 0;
     const newBoard = board.map((rArr) => rArr.slice());
@@ -14,10 +16,12 @@ function SudokuBoard() {
     setBoard(newBoard);
   };
 
+  // セルをタップ
   const handleCellClick = (row, col) => {
     setSelectedCell({ row, col });
   };
 
+  // 数字を入力
   const handleNumberClick = (num) => {
     if (selectedCell) {
       handleChangeCell(selectedCell.row, selectedCell.col, num);
@@ -25,6 +29,7 @@ function SudokuBoard() {
     }
   };
 
+  // 解答リクエスト
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -39,6 +44,20 @@ function SudokuBoard() {
     } catch (error) {
       alert("サーバーへのリクエストでエラーが発生しました。");
     }
+  };
+
+  // 解答のみ消す
+  const handleClearSolution = () => {
+    const newBoard = board.map((row, r) =>
+      row.map((cell, c) => (originalBoard[r][c] !== 0 ? originalBoard[r][c] : 0))
+    );
+    setBoard(newBoard);
+  };
+
+  // すべてリセット
+  const handleResetBoard = () => {
+    setBoard(initialBoard);
+    setOriginalBoard(initialBoard);
   };
 
   return (
@@ -111,7 +130,7 @@ function SudokuBoard() {
                   {num}
                 </button>
               ))}
-              {/* 空白ボタン（0） */}
+              {/* 空白ボタン（削除） */}
               <button
                 onClick={() => handleNumberClick(0)}
                 style={{
@@ -132,21 +151,58 @@ function SudokuBoard() {
           </div>
         )}
 
-        <button
-          type="submit"
-          style={{
-            margin: "20px",
-            padding: "10px 20px",
-            fontSize: "16px",
-            backgroundColor: "#4CAF50",
-            color: "white",
-            border: "none",
-            borderRadius: "5px",
-            cursor: "pointer",
-          }}
-        >
-          解答をリクエスト
-        </button>
+        {/* ボタンエリア */}
+        <div style={{ marginTop: "20px" }}>
+          <button
+            type="submit"
+            style={{
+              margin: "10px",
+              padding: "10px 20px",
+              fontSize: "16px",
+              backgroundColor: "#4CAF50",
+              color: "white",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer",
+            }}
+          >
+            解答をリクエスト
+          </button>
+
+          <button
+            type="button"
+            onClick={handleClearSolution}
+            style={{
+              margin: "10px",
+              padding: "10px 20px",
+              fontSize: "16px",
+              backgroundColor: "#FFA500",
+              color: "white",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer",
+            }}
+          >
+            解答を消す
+          </button>
+
+          <button
+            type="button"
+            onClick={handleResetBoard}
+            style={{
+              margin: "10px",
+              padding: "10px 20px",
+              fontSize: "16px",
+              backgroundColor: "#DC143C",
+              color: "white",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer",
+            }}
+          >
+            すべてリセット
+          </button>
+        </div>
       </form>
     </div>
   );
