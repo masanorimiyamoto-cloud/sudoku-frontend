@@ -50,35 +50,38 @@ function SudokuBoard() {
   // 新しい問題を取得
   const fetchNewPuzzle = async () => {
     try {
-        console.log("🟢 新しい問題をリクエスト中...");
-        const response = await axios.get("https://numplay.onrender.com/generate", {
-            headers: {
-                "Content-Type": "application/json"
-            },
-            mode: "cors"
-        });
-
-        console.log("🟢 APIレスポンス: ", response.data);
-
-        if (response.data.status === "ok" && response.data.board) {
-            // 1次元配列を 9x9 に変換
-            const newBoard = [];
-            for (let i = 0; i < 9; i++) {
-                newBoard.push(response.data.board.slice(i * 9, i * 9 + 9));
-            }
-
-            setBoard(newBoard);
-            setIsUserInput(Array(9).fill(null).map(() => Array(9).fill(false)));
-        } else {
-            console.error("❌ APIから不正なデータが返されました:", response.data);
-            alert("問題の取得に失敗しました。");
+      console.log("🟢 新しい問題をリクエスト中...");
+      const response = await axios.get("https://numplay.onrender.com/generate", {
+        headers: { "Content-Type": "application/json" },
+        mode: "cors"
+      });
+  
+      console.log("🟢 APIレスポンス: ", response.data);
+  
+      // まず board の中身を確かめる
+      let rawBoard = response.data.board;
+      if (typeof rawBoard === "string") {
+        // カンマ区切りの文字列を81要素の配列に変換
+        rawBoard = rawBoard.split(",").map(ch => (ch === "" ? 0 : parseInt(ch, 10) || 0));
+      }
+  
+      // rawBoard が Array(81) だった場合、9x9 にスライス
+      if (Array.isArray(rawBoard) && rawBoard.length === 81) {
+        const newBoard = [];
+        for (let i = 0; i < 9; i++) {
+          newBoard.push(rawBoard.slice(i * 9, i * 9 + 9));
         }
-    } catch (error) {
-        console.error("❌ 問題取得エラー: ", error);
+        setBoard(newBoard);
+      } else {
+        console.error("❌ APIから不正なデータが返されました:", rawBoard);
         alert("問題の取得に失敗しました。");
+      }
+    } catch (error) {
+      console.error("❌ 問題取得エラー: ", error);
+      alert("問題の取得に失敗しました。");
     }
-};
-
+  };
+  
   return (
     <div style={{ textAlign: "center" }}>
       <h1>Sudoku Solver</h1>
