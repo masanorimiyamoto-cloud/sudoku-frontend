@@ -129,9 +129,9 @@ function SudokuBoard() {
         <button type="submit" style={{ margin: "10px", padding: "10px 20px", fontSize: "16px" }}>
           解答をリクエスト
         </button>
-        <button type="button" onClick={fetchNewPuzzle} style={{ margin: "10px", padding: "10px 20px", fontSize: "16px" }}>
-          新しい問題
-        </button>
+        
+         
+        
       </form>
     </div>
   );
