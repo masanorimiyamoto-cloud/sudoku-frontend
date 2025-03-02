@@ -90,7 +90,7 @@ function SudokuBoard() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(3, 50px)",
+                gridTemplateColumns: "repeat(3, 60px)",
                 gap: "5px",
                 justifyContent: "center",
               }}
@@ -100,8 +100,8 @@ function SudokuBoard() {
                   key={num}
                   onClick={() => handleNumberClick(num)}
                   style={{
-                    width: "50px",
-                    height: "50px",
+                    width: "60px",
+                    height: "60px",
                     fontSize: "20px",
                     borderRadius: "10px",
                     border: "1px solid gray",
@@ -111,6 +111,23 @@ function SudokuBoard() {
                   {num}
                 </button>
               ))}
+              {/* 空白ボタン（0） */}
+              <button
+                onClick={() => handleNumberClick(0)}
+                style={{
+                  width: "180px",
+                  height: "60px",
+                  fontSize: "20px",
+                  backgroundColor: "#ff6666",
+                  color: "white",
+                  borderRadius: "10px",
+                  border: "1px solid gray",
+                  cursor: "pointer",
+                  gridColumn: "span 3",
+                }}
+              >
+                削除
+              </button>
             </div>
           </div>
         )}
