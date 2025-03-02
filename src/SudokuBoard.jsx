@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 
 function SudokuBoard() {
-  // 初期状態のボード
+  // 初期状態のボード（9x9のゼロ埋め）
   const initialBoard = Array(9)
     .fill(null)
     .map(() => Array(9).fill(0));
@@ -34,13 +34,15 @@ function SudokuBoard() {
         board: board
       });
 
+      console.log("🟢 解答リクエスト送信: ", response.data);
+
       if (response.data.status === "ok") {
         setBoard(response.data.solution);
       } else {
         alert("解けませんでした: " + response.data.message);
       }
     } catch (error) {
-      console.error(error);
+      console.error("❌ 解答リクエストエラー: ", error);
       alert("サーバーへのリクエストでエラーが発生しました。");
     }
   };
@@ -48,12 +50,25 @@ function SudokuBoard() {
   // 新しい問題を取得
   const fetchNewPuzzle = async () => {
     try {
-      const response = await axios.get("https://numplay.onrender.com/generate");
       console.log("🟢 新しい問題をリクエスト中...");
-      setBoard(response.data.board);
-      setIsUserInput(Array(9).fill(null).map(() => Array(9).fill(false)));
+      const response = await axios.get("https://numplay.onrender.com/generate", {
+        headers: {
+          "Content-Type": "application/json"
+        },
+        mode: "cors" // CORSを明示的に設定
+      });
+
+      console.log("🟢 APIレスポンス: ", response.data);
+
+      if (response.data.status === "ok" && response.data.board) {
+        setBoard(response.data.board);
+        setIsUserInput(Array(9).fill(null).map(() => Array(9).fill(false)));
+      } else {
+        console.error("❌ APIから不正なデータが返されました:", response.data);
+        alert("問題の取得に失敗しました。");
+      }
     } catch (error) {
-      console.error(error);
+      console.error("❌ 問題取得エラー: ", error);
       alert("問題の取得に失敗しました。");
     }
   };
@@ -69,29 +84,30 @@ function SudokuBoard() {
           margin: "20px auto",
           maxWidth: "400px"
         }}>
-          {board.map((rowArr, r) =>
-            rowArr.map((cellVal, c) => (
-              <input
-                key={`${r}-${c}`}
-                type="number"
-                min="0"
-                max="9"
-                value={cellVal === 0 ? "" : cellVal}
-                onChange={(e) => handleChangeCell(r, c, e.target.value)}
-                style={{
-                  width: "40px",
-                  height: "40px",
-                  textAlign: "center",
-                  fontSize: "16px",
-                  backgroundColor: isUserInput[r][c] ? "white" : "#ddd",
-                  fontWeight: isUserInput[r][c] ? "bold" : "normal",
-                  border: `1px solid black`,
-                  borderTop: r % 3 === 0 ? "3px solid black" : "1px solid gray",
-                  borderLeft: c % 3 === 0 ? "3px solid black" : "1px solid gray"
-                }}
-              />
-            ))
-          )}
+          {board &&
+            board.map((rowArr, r) =>
+              rowArr.map((cellVal, c) => (
+                <input
+                  key={`${r}-${c}`}
+                  type="number"
+                  min="0"
+                  max="9"
+                  value={cellVal === 0 ? "" : cellVal}
+                  onChange={(e) => handleChangeCell(r, c, e.target.value)}
+                  style={{
+                    width: "40px",
+                    height: "40px",
+                    textAlign: "center",
+                    fontSize: "16px",
+                    backgroundColor: isUserInput[r][c] ? "white" : "#ddd",
+                    fontWeight: isUserInput[r][c] ? "bold" : "normal",
+                    border: `1px solid black`,
+                    borderTop: r % 3 === 0 ? "3px solid black" : "1px solid gray",
+                    borderLeft: c % 3 === 0 ? "3px solid black" : "1px solid gray"
+                  }}
+                />
+              ))
+            )}
         </div>
         <button type="submit" style={{ margin: "10px", padding: "10px 20px", fontSize: "16px" }}>
           解答をリクエスト
