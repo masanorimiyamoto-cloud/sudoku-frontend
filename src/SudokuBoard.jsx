@@ -2,22 +2,28 @@ import React, { useState } from "react";
 import axios from "axios";
 
 function SudokuBoard() {
-  const initialBoard = Array(9).fill(null).map(() => Array(9).fill(0));
+  const initialBoard = Array(9)
+    .fill(null)
+    .map(() => Array(9).fill(0));
 
   const [board, setBoard] = useState(initialBoard);
   const [originalBoard, setOriginalBoard] = useState(null); // 問題を保存する
   const [selectedCell, setSelectedCell] = useState(null); // タップされたセル
+  const [problemCells, setProblemCells] = useState([]); // 問題としてセットされたセルの座標を記録
 
-  // セルが変更されたとき
+  // セルが変更されたとき（問題セルは変更不可）
   const handleChangeCell = (row, col, value) => {
+    // すでに問題セルに指定されている場合は変更を許可しない
+    if (problemCells.some(([r, c]) => r === row && c === col)) return;
     const val = parseInt(value) || 0;
     const newBoard = board.map((rArr) => rArr.slice());
     newBoard[row][col] = val;
     setBoard(newBoard);
   };
 
-  // セルをタップ
+  // セルをタップ（問題セルの場合は選択しない）
   const handleCellClick = (row, col) => {
+    if (problemCells.some(([r, c]) => r === row && c === col)) return;
     setSelectedCell({ row, col });
   };
 
@@ -29,9 +35,13 @@ function SudokuBoard() {
     }
   };
 
-  // 問題をセット（originalBoard に保存）
+  // 問題をセット（originalBoard に保存し、固定セルを記録）
   const handleSetProblem = () => {
     setOriginalBoard(board.map(row => [...row])); // 現在の board をコピーして保存
+    const fixedCells = board.flatMap((row, r) =>
+      row.map((cell, c) => (cell !== 0 ? [r, c] : null))
+    ).filter(Boolean);
+    setProblemCells(fixedCells);
     alert("問題がセットされました！");
   };
 
@@ -66,6 +76,7 @@ function SudokuBoard() {
   const handleResetBoard = () => {
     setBoard(initialBoard.map(row => [...row]));
     setOriginalBoard(null);
+    setProblemCells([]); // 固定セルもクリア
   };
 
   return (
@@ -82,31 +93,36 @@ function SudokuBoard() {
           }}
         >
           {board.map((rowArr, r) =>
-            rowArr.map((cellVal, c) => (
-              <div
-                key={`${r}-${c}`}
-                onClick={() => handleCellClick(r, c)}
-                style={{
-                  width: "50px",
-                  height: "50px",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  fontSize: "20px",
-                  backgroundColor:
-                    selectedCell?.row === r && selectedCell?.col === c
-                      ? "lightblue"
+            rowArr.map((cellVal, c) => {
+              const isSelected = selectedCell?.row === r && selectedCell?.col === c;
+              const isFixed = problemCells.some(([pr, pc]) => pr === r && pc === c);
+              return (
+                <div
+                  key={`${r}-${c}`}
+                  onClick={() => handleCellClick(r, c)}
+                  style={{
+                    width: "50px",
+                    height: "50px",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    fontSize: "20px",
+                    backgroundColor: isFixed
+                      ? "#d3d3d3" // 固定セルはライトグレー
+                      : isSelected
+                      ? "lightblue" // 選択中は青
                       : "white",
-                  fontWeight: "bold",
-                  border: `1px solid black`,
-                  borderTop: r % 3 === 0 ? "3px solid black" : "1px solid gray",
-                  borderLeft: c % 3 === 0 ? "3px solid black" : "1px solid gray",
-                  cursor: "pointer",
-                }}
-              >
-                {cellVal !== 0 ? cellVal : ""}
-              </div>
-            ))
+                    fontWeight: "bold",
+                    border: `1px solid black`,
+                    borderTop: r % 3 === 0 ? "3px solid black" : "1px solid gray",
+                    borderLeft: c % 3 === 0 ? "3px solid black" : "1px solid gray",
+                    cursor: isFixed ? "default" : "pointer",
+                  }}
+                >
+                  {cellVal !== 0 ? cellVal : ""}
+                </div>
+              );
+            })
           )}
         </div>
 
