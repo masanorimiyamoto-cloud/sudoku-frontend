@@ -9,11 +9,12 @@ function SudokuBoard() {
   const [board, setBoard] = useState(initialBoard);
   const [originalBoard, setOriginalBoard] = useState(null); // 問題を保存する
   const [selectedCell, setSelectedCell] = useState(null); // タップされたセル
-  const [problemCells, setProblemCells] = useState([]); // 問題としてセットされたセルの座標を記録
+  const [problemCells, setProblemCells] = useState([]);   // 問題としてセットされたセルの座標
+  const [errorCells, setErrorCells] = useState([]);         // ユーザー入力が誤っているセルの座標
 
   // セルが変更されたとき（問題セルは変更不可）
   const handleChangeCell = (row, col, value) => {
-    // すでに問題セルに指定されている場合は変更を許可しない
+    // 問題セルは変更不可
     if (problemCells.some(([r, c]) => r === row && c === col)) return;
     const val = parseInt(value) || 0;
     const newBoard = board.map((rArr) => rArr.slice());
@@ -37,11 +38,14 @@ function SudokuBoard() {
 
   // 問題をセット（originalBoard に保存し、固定セルを記録）
   const handleSetProblem = () => {
-    setOriginalBoard(board.map(row => [...row])); // 現在の board をコピーして保存
-    const fixedCells = board.flatMap((row, r) =>
-      row.map((cell, c) => (cell !== 0 ? [r, c] : null))
-    ).filter(Boolean);
+    setOriginalBoard(board.map((row) => [...row])); // 現在の board をコピーして保存
+    const fixedCells = board
+      .flatMap((row, r) =>
+        row.map((cell, c) => (cell !== 0 ? [r, c] : null))
+      )
+      .filter(Boolean);
     setProblemCells(fixedCells);
+    setErrorCells([]); // 問題セット時はエラーセルはリセット
     alert("問題がセットされました！");
   };
 
@@ -54,6 +58,7 @@ function SudokuBoard() {
       });
       if (response.data.status === "ok") {
         setBoard(response.data.solution);
+        setErrorCells([]); // 解答後はエラーセルもリセット
       } else {
         alert("解けませんでした: " + response.data.message);
       }
@@ -68,15 +73,53 @@ function SudokuBoard() {
       alert("問題をセットしてください！");
       return;
     }
-    const newBoard = originalBoard.map(row => [...row]); // originalBoard を元に戻す
+    const newBoard = originalBoard.map((row) => [...row]); // originalBoard を元に戻す
     setBoard(newBoard);
+    setErrorCells([]); // エラーセルもクリア
   };
 
   // すべてリセット（完全にクリア）
   const handleResetBoard = () => {
-    setBoard(initialBoard.map(row => [...row]));
+    setBoard(initialBoard.map((row) => [...row]));
     setOriginalBoard(null);
-    setProblemCells([]); // 固定セルもクリア
+    setProblemCells([]);
+    setErrorCells([]);
+  };
+
+  // 部分チェック機能
+  const handleCheckPartialSolution = async () => {
+    if (!originalBoard) {
+      alert("問題をセットしてください！");
+      return;
+    }
+    try {
+      // 正解は問題セット時の originalBoard から取得
+      const response = await axios.post("https://numplay.onrender.com/solve", {
+        board: originalBoard,
+      });
+      if (response.data.status === "ok") {
+        const solution = response.data.solution;
+        let errors = [];
+        for (let i = 0; i < 9; i++) {
+          for (let j = 0; j < 9; j++) {
+            // ユーザーが入力済みで、かつ正解と異なる場合はエラーとする
+            if (board[i][j] !== 0 && board[i][j] !== solution[i][j]) {
+              errors.push([i, j]);
+            }
+          }
+        }
+        setErrorCells(errors);
+        if (errors.length === 0) {
+          alert("入力された値はすべて正しいです！");
+        } else {
+          alert("いくつかのセルに誤りがあります！");
+        }
+      } else {
+        alert("正解が取得できませんでした: " + response.data.message);
+      }
+    } catch (error) {
+      alert("サーバーへのリクエストでエラーが発生しました。");
+    }
   };
 
   return (
@@ -96,6 +139,15 @@ function SudokuBoard() {
             rowArr.map((cellVal, c) => {
               const isSelected = selectedCell?.row === r && selectedCell?.col === c;
               const isFixed = problemCells.some(([pr, pc]) => pr === r && pc === c);
+              const isError = errorCells.some(([er, ec]) => er === r && ec === c);
+              let backgroundColor = "white";
+              if (isError) {
+                backgroundColor = "lightcoral"; // エラーセルは赤み
+              } else if (isSelected) {
+                backgroundColor = "lightblue";
+              } else if (isFixed) {
+                backgroundColor = "#d3d3d3";
+              }
               return (
                 <div
                   key={`${r}-${c}`}
@@ -107,11 +159,7 @@ function SudokuBoard() {
                     justifyContent: "center",
                     alignItems: "center",
                     fontSize: "20px",
-                    backgroundColor: isFixed
-                      ? "#d3d3d3" // 固定セルはライトグレー
-                      : isSelected
-                      ? "lightblue" // 選択中は青
-                      : "white",
+                    backgroundColor,
                     fontWeight: "bold",
                     border: `1px solid black`,
                     borderTop: r % 3 === 0 ? "3px solid black" : "1px solid gray",
@@ -208,6 +256,23 @@ function SudokuBoard() {
             }}
           >
             解答をリクエスト
+          </button>
+
+          <button
+            type="button"
+            onClick={handleCheckPartialSolution}
+            style={{
+              margin: "10px",
+              padding: "10px 20px",
+              fontSize: "16px",
+              backgroundColor: "#6A5ACD",
+              color: "white",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer",
+            }}
+          >
+            部分チェック
           </button>
 
           <button
