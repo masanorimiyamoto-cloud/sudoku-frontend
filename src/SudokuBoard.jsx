@@ -9,7 +9,7 @@ function SudokuBoard() {
 
   return (
     <div style={{ textAlign: "center" }}>
-      <h1>Sudoku Solver</h1>
+      <h1>Sudoku Solver0320 22:33</h1>
       <form onSubmit={handleSubmit}>
         <BoardGrid
           board={board}
