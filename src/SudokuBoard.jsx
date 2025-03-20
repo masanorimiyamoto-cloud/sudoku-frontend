@@ -1,6 +1,8 @@
+// src/SudokuBoard.jsx
 import React, { useState } from "react";
 import axios from "axios";
-import Cell from "./components/cell";
+import BoardGrid from "./components/BoardGrid";
+
 function SudokuBoard() {
   const initialBoard = Array(9)
     .fill(null)
@@ -9,8 +11,8 @@ function SudokuBoard() {
   const [board, setBoard] = useState(initialBoard);
   const [originalBoard, setOriginalBoard] = useState(null); // 問題を保存する
   const [selectedCell, setSelectedCell] = useState(null); // タップされたセル
-  const [problemCells, setProblemCells] = useState([]);   // 問題としてセットされたセルの座標
-  const [errorCells, setErrorCells] = useState([]);         // ユーザー入力が誤っているセルの座標
+  const [problemCells, setProblemCells] = useState([]); // 問題としてセットされたセルの座標
+  const [errorCells, setErrorCells] = useState([]); // ユーザー入力が誤っているセルの座標
 
   // セルが変更されたとき（問題セルは変更不可）
   const handleChangeCell = (row, col, value) => {
@@ -126,30 +128,13 @@ function SudokuBoard() {
     <div style={{ textAlign: "center" }}>
       <h1>Sudoku Solver</h1>
       <form onSubmit={handleSubmit}>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(9, 50px)",
-            gap: "2px",
-            margin: "20px auto",
-            maxWidth: "500px",
-          }}
-        >
-                    {/* 差し替え後 */}
-          {board.map((rowArr, r) =>
-            rowArr.map((val, c) => (
-              <Cell
-                key={`${r}-${c}`}
-                value={val}
-                isFixed={problemCells.some(([pr, pc]) => pr === r && pc === c)}
-                isError={errorCells.some(([er, ec]) => er === r && ec === c)}
-                isSelected={selectedCell?.row === r && selectedCell?.col === c}
-                onClick={() => handleCellClick(r, c)}
-              />
-            ))
-          )}
-
-        </div>
+        <BoardGrid
+          board={board}
+          problemCells={problemCells}
+          errorCells={errorCells}
+          selectedCell={selectedCell}
+          onCellClick={handleCellClick}
+        />
 
         {/* 数字キーパッド */}
         {selectedCell && (
