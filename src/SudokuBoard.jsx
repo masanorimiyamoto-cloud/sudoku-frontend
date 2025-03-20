@@ -1,28 +1,34 @@
-// テスト用の簡易版 SudokuBoard.jsx
 import React, { useState } from "react";
+import axios from "axios";
 import BoardGrid from "./components/BoardGrid";
+import NumberPad from "./components/NumberPad";
+import ControlButtons from "./components/ControlButtons";
 
 function SudokuBoard() {
-  const initialBoard = Array(9)
-    .fill(null)
-    .map(() => Array(9).fill(0));
-
-  const [board, setBoard] = useState(initialBoard);
-
-  const handleCellClick = (r, c) => {
-    console.log(`Cell clicked: ${r}, ${c}`);
-  };
+  // ... state 定義、イベントハンドラなど（省略）
 
   return (
     <div style={{ textAlign: "center" }}>
       <h1>Sudoku Solver</h1>
-      <BoardGrid
-        board={board}
-        problemCells={[]}
-        errorCells={[]}
-        selectedCell={null}
-        onCellClick={handleCellClick}
-      />
+      <form onSubmit={handleSubmit}>
+        <BoardGrid
+          board={board}
+          problemCells={problemCells}
+          errorCells={errorCells}
+          selectedCell={selectedCell}
+          onCellClick={handleCellClick}
+        />
+
+        {selectedCell && <NumberPad onNumberClick={handleNumberClick} />}
+
+        <ControlButtons
+          onSetProblem={handleSetProblem}
+          onSubmit={handleSubmit}
+          onCheckPartial={handleCheckPartialSolution}
+          onClearSolution={handleClearSolution}
+          onReset={handleResetBoard}
+        />
+      </form>
     </div>
   );
 }
