@@ -150,7 +150,7 @@ function SudokuBoard() {
               }
               return (
                 <div
-                  key={${r}-${c}}
+                  key={'${r}-${c}'}
                   onClick={() => handleCellClick(r, c)}
                   style={{
                     width: "50px",
@@ -161,7 +161,7 @@ function SudokuBoard() {
                     fontSize: "20px",
                     backgroundColor,
                     fontWeight: "bold",
-                    border: 1px solid black,
+                    border: "1px solid black",
                     borderTop: r % 3 === 0 ? "3px solid black" : "1px solid gray",
                     borderLeft: c % 3 === 0 ? "3px solid black" : "1px solid gray",
                     cursor: isFixed ? "default" : "pointer",
