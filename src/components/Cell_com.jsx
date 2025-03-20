@@ -18,9 +18,14 @@ export default function Cell({
     .filter(Boolean)
     .join(" ");
 
-  return (
-    <div className={className} onClick={onClick}>
-      {value || ""}
-    </div>
-  );
+    return (
+      <div
+        className={className}
+        onClick={onClick}
+        style={{ width: "50px", height: "50px", border: "1px solid black" }}
+      >
+        {value || ""}
+      </div>
+    );
+    
 }
