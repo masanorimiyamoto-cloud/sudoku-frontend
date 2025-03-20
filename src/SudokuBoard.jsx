@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-
+import Cell from "./components/cell";
 function SudokuBoard() {
   const initialBoard = Array(9)
     .fill(null)
@@ -135,43 +135,20 @@ function SudokuBoard() {
             maxWidth: "500px",
           }}
         >
+                    {/* 差し替え後 */}
           {board.map((rowArr, r) =>
-            rowArr.map((cellVal, c) => {
-              const isSelected = selectedCell?.row === r && selectedCell?.col === c;
-              const isFixed = problemCells.some(([pr, pc]) => pr === r && pc === c);
-              const isError = errorCells.some(([er, ec]) => er === r && ec === c);
-              let backgroundColor = "white";
-              if (isError) {
-                backgroundColor = "lightcoral"; // エラーセルは赤み
-              } else if (isSelected) {
-                backgroundColor = "lightblue";
-              } else if (isFixed) {
-                backgroundColor = "#d3d3d3";
-              }
-              return (
-                <div
-                  key={`${r}-${c}`}
-                  onClick={() => handleCellClick(r, c)}
-                  style={{
-                    width: "50px",
-                    height: "50px",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    fontSize: "20px",
-                    backgroundColor,
-                    fontWeight: "bold",
-                    border: `1px solid black`,
-                    borderTop: r % 3 === 0 ? "3px solid black" : "1px solid gray",
-                    borderLeft: c % 3 === 0 ? "3px solid black" : "1px solid gray",
-                    cursor: isFixed ? "default" : "pointer",
-                  }}
-                >
-                  {cellVal !== 0 ? cellVal : ""}
-                </div>
-              );
-            })
+            rowArr.map((val, c) => (
+              <Cell
+                key={`${r}-${c}`}
+                value={val}
+                isFixed={problemCells.some(([pr, pc]) => pr === r && pc === c)}
+                isError={errorCells.some(([er, ec]) => er === r && ec === c)}
+                isSelected={selectedCell?.row === r && selectedCell?.col === c}
+                onClick={() => handleCellClick(r, c)}
+              />
+            ))
           )}
+
         </div>
 
         {/* 数字キーパッド */}
