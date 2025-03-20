@@ -1,6 +1,6 @@
 // src/components/BoardGrid.jsx
 import React from "react";
-import Cell from "./cell";
+import Cell from "./Cell_com";
 import "../styles/BoardGrid.css"; // 必要なら CSS を別途用意
 
 export default function BoardGrid({
