@@ -1,0 +1,57 @@
+/* src/components/BoardGrid.css */
+.board {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    grid-template-rows: repeat(9, 1fr);
+    gap: 1px; /* セル間のスペースを調整 */
+    width: max-content; /* グリッドの幅を内容に合わせる */
+    margin: 0 auto; /* 中央揃え */
+    border: 2px solid #333; /* 外側の境界線を濃い灰色に */
+}
+
+.cell {
+    width: 48px; /* セルのサイズ */
+    height: 48px;
+    text-align: center;
+    border: 1px solid #ccc; /* セルの境界線を薄い灰色に */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff; /* 通常のセルの背景色 */
+    font-size: 18px; /* 文字サイズを大きくする */
+    font-weight: bold; /* 文字を太くする */
+    transition: background-color 0.2s ease; /* アニメーション */
+}
+
+/* 3x3ブロックの右側の境界線 */
+.cell.block-border-right {
+    border-right: 2px solid #333; /* 濃い灰色に */
+}
+
+/* 3x3ブロックの下側の境界線 */
+.cell.block-border-bottom {
+    border-bottom: 2px solid #333; /* 濃い灰色に */
+}
+
+/* 問題セルのスタイル */
+.cell.problem {
+    background-color: #f0f0f0; /* 薄い灰色 */
+    color: #000; /* 文字色を黒に */
+}
+
+/* エラーセルのスタイル */
+.cell.error {
+    background-color: #ffebee; /* 薄い赤色 */
+    color: #d32f2f; /* 文字色を濃い赤に */
+}
+
+/* ホバーエフェクト */
+.cell:hover {
+    background-color: #e3f2fd; /* 薄い青色 */
+    cursor: pointer;
+}
+
+/* 選択中のセルのスタイル */
+.cell.selected {
+    background-color: #bbdefb; /* 選択中のセルは少し濃い青色 */
+}
